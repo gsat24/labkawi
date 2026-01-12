@@ -1,0 +1,1551 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab Kawi 31 LIS</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=1.2">
+<style>
+  /* Force override for status badges and buttons in Pembayaran */
+  .status-badge {
+    padding: 4px 10px !important;
+    border-radius: 6px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    color: white !important;
+    display: inline-block !important;
+  }
+  .status-badge.danger { background-color: #b91c1c !important; }
+  .status-badge.green { background-color: #15803d !important; }
+  .status-badge.gray { background-color: #6b7280 !important; }
+  
+  .btn.primary { background-color: #1e40af !important; color: white !important; }
+  .btn.danger { background-color: #b91c1c !important; color: white !important; }
+</style>
+</head>
+<body class="theme-light role-admin auth-loading">
+
+<!-- Login Page -->
+<div id="login-page" class="login-overlay" style="display: none;">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-logo">
+        <svg width="40" height="40"><use href="#i-medical"/></svg>
+      </div>
+      <h2>Lab Kawi 31</h2>
+      <p>Silakan masuk ke akun Anda</p>
+    </div>
+    <form id="login-form" class="login-form">
+      <div class="form-group">
+        <label>Username</label>
+        <div class="input-with-icon">
+          <svg width="18" height="18"><use href="#i-user"/></svg>
+          <input type="text" id="login-username" class="input full" placeholder="Username" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-with-icon">
+          <svg width="18" height="18" style="transform: rotate(90deg);"><use href="#i-settings"/></svg>
+          <input type="password" id="login-password" class="input full" placeholder="Password" required>
+        </div>
+      </div>
+      <button type="submit" class="btn primary full btn-large mt-2">Masuk Sekarang</button>
+      <div id="login-error" class="login-error-msg" style="display: none;">
+        Username atau password salah!
+      </div>
+    </form>
+    <div class="login-footer">
+      &copy; 2026 Lab Kawi Management System
+    </div>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute;visibility:hidden">
+<symbol id="i-medical" viewBox="0 0 24 24"><path fill="currentColor" d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4z"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5A6.5 6.5 0 1 0 9.5 16a6.47 6.47 0 0 0 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5S14 7.01 14 9.5S11.99 14 9.5 14"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><path fill="currentColor" d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2m0 16H5V10h14z"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3s1.34 3 3 3m-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5S5 6.34 5 8s1.34 3 3 3m0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5m8 0c-.29 0-.62.02-.97.05c1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5"/></symbol>
+<symbol id="i-activity" viewBox="0 0 24 24"><path fill="currentColor" d="M11 2v20c-5.07-.5-9-4.79-9-10s3.93-9.5 9-10m2 0v20c5.07-.5 9-4.79 9-10s-3.93-9.5-9-10"/></symbol>
+<symbol id="i-cash" viewBox="0 0 24 24"><path fill="currentColor" d="M3 6h18v12H3zm2 2v8h14V8zm7 2a3 3 0 1 1 0 6a3 3 0 0 1 0-6z"/></symbol>
+<symbol id="i-chat" viewBox="0 0 24 24"><path fill="currentColor" d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2m-2 12H6v-2h12zm0-3H6V9h12zm0-3H6V6h12z"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22c1.1 0 2-.9 2-2h-4a2 2 0 0 0 2 2m6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1z"/></symbol>
+<symbol id="i-chevron-down" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41 8.58L12 13.17l4.59-4.59L18 10l-6 6l-6-6z"/></symbol>
+<symbol id="i-chevron-right" viewBox="0 0 24 24"><path fill="currentColor" d="M10 6L8.59 7.41L13.17 12l-4.58 4.59L10 18l6-6z"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12a5 5 0 1 0-5-5a5 5 0 0 0 5 5m-9 8a9 9 0 1 1 18 0Z"/></symbol>
+<symbol id="i-doctor" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4a4 4 0 0 1 4 4v2h2a2 2 0 0 1 2 2v6h-6v-3h-4v3H4v-6a2 2 0 0 1 2-2h2V8a4 4 0 0 1 4-4"/></symbol>
+<symbol id="i-flask" viewBox="0 0 24 24"><path fill="currentColor" d="M10 2h4v2h1v2l4.5 9.8A3 3 0 0 1 16.8 20H7.2a3 3 0 0 1-2.7-4.2L9 6V4h1z"/></symbol>
+<symbol id="i-pos" viewBox="0 0 24 24"><path fill="currentColor" d="M17 2H7a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V5a3 3 0 0 0-3-3m-7 16H8v-2h2zm0-4H8v-2h2zm0-4H8V8h2zm4 8h-2v-2h2zm0-4h-2v-2h2zm0-4h-2V8h2zm3 8h-2v-2h2zm0-4h-2v-2h2zm0-4h-2V8h2z"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path fill="currentColor" d="M3 13h2v-2H3zm0 4h2v-2H3zm0-8h2V7H3zm4 4h14v-2H7zm0 4h14v-2H7zm0-8v2h14V7z"/></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24"><path fill="currentColor" d="M12 8a4 4 0 1 1 0 8a4 4 0 0 1 0-8m8.14 2a8.1 8.1 0 0 1 0 4l2.06 1.6l-2 3.46l-2.5-.5a8.4 8.4 0 0 1-3.24 1.88L13 22h-2l-.46-2.06A8.4 8.4 0 0 1 7.3 18.1l-2.5.5l-2-3.46L4.86 14a8.1 8.1 0 0 1 0-4L2.8 8.4l2-3.46l2.5.5a8.4 8.4 0 0 1 3.24-1.88L11 2h2l.46 2.06a8.4 8.4 0 0 1 3.24 1.88z"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path fill="currentColor" d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6zM19 4h-3.5l-1-1h-5l-1 1H5v2h14z"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83l3.75 3.75z"/></symbol>
+<symbol id="i-logout" viewBox="0 0 24 24"><path fill="currentColor" d="M16 17v-3H9v-4h7V7l5 5zm-2 4H5V3h9v2H7v14h7z"/></symbol>
+<symbol id="i-help" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m1 17h-2v-2h2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41a2 2 0 0 0-2-2a2 2 0 0 0-2 2H8a4 4 0 0 1 4-4a4 4 0 0 1 4 4c0 .88-.36 1.68-.93 2.25"/></symbol>
+</svg>
+
+<div class="app" id="main-app" style="display: none;">
+<nav class="sidebar">
+  <a href="#dashboard" class="sidebar-brand">
+    <div class="brand-icon">
+      <svg width="24" height="24"><use href="#i-medical"/></svg>
+    </div>
+    <span class="brand-text">Lab Kawi</span>
+  </a>
+
+  <div class="sidebar-nav">
+    <a class="sidebar-item is-active" href="#dashboard">
+      <svg><use href="#i-grid"/></svg>
+      <span>Dashboard</span>
+    </a>
+
+    <div class="sidebar-heading" data-section="user">
+      <span>MANAJEMEN PENGGUNA</span>
+      <svg width="12" height="12"><use href="#i-chevron-down"/></svg>
+    </div>
+    <div class="sidebar-items">
+      <a class="sidebar-item" href="#crud:user" data-feature="user">Pengguna</a>
+      <a class="sidebar-item" href="#rbac" data-feature="rbac">Hak Akses (RBAC)</a>
+    </div>
+
+    <div class="sidebar-heading" data-section="master">
+      <span>DATA MASTER</span>
+      <svg width="12" height="12"><use href="#i-chevron-down"/></svg>
+    </div>
+    <div class="sidebar-items">
+      <a class="sidebar-item" href="#master-personalia" data-feature="master-personalia">Personalia</a>
+      <a class="sidebar-item" href="#master-laboratorium" data-feature="master-laboratorium">Laboratorium</a>
+    </div>
+
+    <div class="sidebar-heading" data-section="admin">
+      <span>ADMINISTRASI</span>
+      <svg width="12" height="12"><use href="#i-chevron-down"/></svg>
+    </div>
+    <div class="sidebar-items">
+      <a class="sidebar-item" href="#pos" data-feature="pos">Transaksi (POS)</a>
+      <a class="sidebar-item" href="#pembayaran" data-feature="pembayaran">Pembayaran</a>
+      <a class="sidebar-item" href="#koreksi-transaksi" data-feature="koreksi-transaksi">Koreksi</a>
+      <a class="sidebar-item" href="#laporan-pusat" data-feature="laporan-pusat">Laporan & Rekap</a>
+    </div>
+
+    <div class="sidebar-heading" data-section="proses">
+      <span>PROSES LAB</span>
+      <svg width="12" height="12"><use href="#i-chevron-down"/></svg>
+    </div>
+    <div class="sidebar-items">
+      <a class="sidebar-item" href="#analis-lab" data-feature="analis-lab">Hasil Analisa</a>
+      <a class="sidebar-item" href="#radiologi" data-feature="radiologi">Radiologi</a>
+      <a class="sidebar-item" href="#medical-report" data-feature="medical-report">Medical Report</a>
+    </div>
+
+    <div class="sidebar-heading" data-section="logistik">
+      <span>LOGISTIK</span>
+      <svg width="12" height="12"><use href="#i-chevron-down"/></svg>
+    </div>
+    <div class="sidebar-items">
+      <a class="sidebar-item" href="#logistik-pemakaian" data-feature="logistik-pemakaian">Pemakaian Bahan</a>
+      <a class="sidebar-item" href="#logistik-habis" data-feature="logistik-habis">Bahan Habis</a>
+      <a class="sidebar-item" href="#logistik-koreksi" data-feature="logistik-koreksi">Koreksi Logistik</a>
+    </div>
+
+    <div class="sidebar-heading" data-section="kas">
+      <span>TRANSAKSI KAS</span>
+      <svg width="12" height="12"><use href="#i-chevron-down"/></svg>
+    </div>
+    <div class="sidebar-items">
+      <a class="sidebar-item" href="#transaksi-kas" data-feature="transaksi-kas">Kas Utama</a>
+      <a class="sidebar-item" href="#transaksi-lain" data-feature="transaksi-lain">Kas Lain-lain</a>
+      <a class="sidebar-item" href="#mutasi-kas" data-feature="mutasi-kas">Mutasi Kas</a>
+    </div>
+
+    <div class="sidebar-heading" data-section="util">
+      <span>UTILITAS</span>
+      <svg width="12" height="12"><use href="#i-chevron-down"/></svg>
+    </div>
+    <div class="sidebar-items">
+      <a class="sidebar-item" href="#integrasi" data-feature="integrasi">SATUSEHAT</a>
+    </div>
+  </div>
+</nav>
+
+<header class="topbar">
+  <div class="search-container">
+    <svg class="search-icon" width="18" height="18"><use href="#i-search"/></svg>
+    <input class="search" type="search" placeholder="Cari apa saja...">
+  </div>
+  <div class="top-actions">
+    <a id="pos-shortcut" href="#pos" class="btn primary btn-sm flex items-center gap-2" style="border-radius: 10px; padding: 8px 16px; font-weight: 600; text-decoration: none; margin-right: 8px;">
+      <svg width="18" height="18"><use href="#i-pos"/></svg>
+      <span>Buka POS</span>
+    </a>
+    <div class="action-icon"><svg width="20" height="20"><use href="#i-chat"/></svg></div>
+    <div class="action-icon"><svg width="20" height="20"><use href="#i-bell"/></svg></div>
+    <div class="user-profile" onclick="toggleRoleSwitcher()" style="position: relative; cursor: pointer;">
+      <div class="avatar">
+        <img src="https://i.pravatar.cc/100?u=admin" alt="Admin" style="width: 100%;" id="current-user-avatar">
+      </div>
+      <div class="flex-column" style="margin: 0 8px;">
+        <span class="font-bold text-sm" id="current-user-name">Administrator</span>
+        <span class="tiny text-muted" id="current-user-role">Super Admin</span>
+      </div>
+      <svg width="12" height="12" class="muted-icon"><use href="#i-chevron-down"/></svg>
+      
+      <!-- Role Switcher Dropdown -->
+      <div id="role-switcher" class="profile-dropdown shadow-lg" style="display: none;">
+        <div id="role-switcher-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="content">
+  <div class="breadcrumbs">
+    <span id="crumb-module">Dashboard</span>
+    <span class="breadcrumb-separator">/</span>
+    <span id="crumb-sub"></span>
+  </div>
+
+  <section id="dashboard" class="view is-active">
+    <div class="header-group">
+      <h1 class="header-title">Ikhtisar Dashboard</h1>
+      <p class="header-subtitle">Selamat datang kembali, Admin! Berikut adalah ringkasan hari ini.</p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card blue">
+        <div class="flex-between">
+          <div class="icon-wrapper"><svg width="24" height="24"><use href="#i-calendar"/></svg></div>
+          <div class="stat-more">•••</div>
+        </div>
+        <div style="margin-top: 12px;">
+          <div class="stat-label">Total Invoice</div>
+          <div class="stat-value" id="stat-total-inv">0</div>
+        </div>
+        <div class="trend">
+          <span class="trend-badge" id="stat-inv-trend">+0%</span>
+          <span>dari kemarin</span>
+        </div>
+      </div>
+      <div class="stat-card green">
+        <div class="flex-between">
+          <div class="icon-wrapper"><svg width="24" height="24"><use href="#i-users"/></svg></div>
+          <div class="stat-more">•••</div>
+        </div>
+        <div style="margin-top: 12px;">
+          <div class="stat-label">Total Pasien</div>
+          <div class="stat-value" id="stat-total-pasien">0</div>
+        </div>
+        <div class="trend">
+          <span class="trend-badge" id="stat-pasien-trend">+0%</span>
+          <span>dari bulan lalu</span>
+        </div>
+      </div>
+      <div class="stat-card purple">
+        <div class="flex-between">
+          <div class="icon-wrapper"><svg width="24" height="24"><use href="#i-activity"/></svg></div>
+          <div class="stat-more">•••</div>
+        </div>
+        <div style="margin-top: 12px;">
+          <div class="stat-label">Hasil Lab Selesai</div>
+          <div class="stat-value" id="stat-total-hasil">0</div>
+        </div>
+        <div class="trend">
+          <span class="trend-badge" id="stat-hasil-trend">+0%</span>
+          <span>tingkat penyelesaian</span>
+        </div>
+      </div>
+      <div class="stat-card orange">
+        <div class="flex-between">
+          <div class="icon-wrapper"><svg width="24" height="24"><use href="#i-cash"/></svg></div>
+          <div class="stat-more">•••</div>
+        </div>
+        <div style="margin-top: 12px;">
+          <div class="stat-label">Total Pendapatan</div>
+          <div class="stat-value" id="stat-total-income">Rp 0</div>
+        </div>
+        <div class="trend">
+          <span class="trend-badge" id="stat-income-trend">+0%</span>
+          <span>pencapaian target</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-main">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Statistik Pasien</h2>
+            <div class="card-subtitle">Tinjauan mingguan kunjungan lab</div>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item"><div class="dot male"></div> Laki-laki</div>
+            <div class="legend-item"><div class="dot female"></div> Perempuan</div>
+          </div>
+        </div>
+        <div class="chart-container">
+          <div class="chart-bar-group">
+            <div class="chart-bar female" style="height: 30%;"></div>
+            <div class="chart-bar male" style="height: 40%;"></div>
+            <div class="chart-label">Sen</div>
+          </div>
+          <div class="chart-bar-group">
+            <div class="chart-bar female" style="height: 45%;"></div>
+            <div class="chart-bar male" style="height: 60%;"></div>
+            <div class="chart-label">Sel</div>
+          </div>
+          <div class="chart-bar-group">
+            <div class="chart-bar female" style="height: 35%;"></div>
+            <div class="chart-bar male" style="height: 45%;"></div>
+            <div class="chart-label">Rab</div>
+          </div>
+          <div class="chart-bar-group">
+            <div class="chart-bar female" style="height: 55%;"></div>
+            <div class="chart-bar male" style="height: 80%;"></div>
+            <div class="chart-label">Kam</div>
+          </div>
+          <div class="chart-bar-group">
+            <div class="chart-bar female" style="height: 40%;"></div>
+            <div class="chart-bar male" style="height: 55%;"></div>
+            <div class="chart-label">Jum</div>
+          </div>
+          <div class="chart-bar-group">
+            <div class="chart-bar female" style="height: 50%;"></div>
+            <div class="chart-bar male" style="height: 70%;"></div>
+            <div class="chart-label">Sab</div>
+          </div>
+          <div class="chart-bar-group">
+            <div class="chart-bar female" style="height: 65%;"></div>
+            <div class="chart-bar male" style="height: 90%;"></div>
+            <div class="chart-label">Min</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title" style="margin-bottom: 24px;">Target Bulanan</h2>
+        <div class="progress-circle-container">
+          <div class="progress-circle" style="--percent: 75">
+            <div class="progress-value">75%</div>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-label">
+            <span style="font-weight: 600;">Pendapatan Bulanan</span>
+            <span class="card-subtitle" style="margin-top: 0;">Rp 12,6jt / Rp 16jt</span>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" style="width: 75%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="grid-column: span 2;">
+        <div class="card-header" style="margin-bottom: 20px;">
+          <div>
+            <h2 class="card-title">Registrasi Lab Terbaru</h2>
+            <div class="card-subtitle">Pasien terakhir yang menunggu analisis</div>
+          </div>
+          <button class="btn ghost tiny">Lihat Semua Riwayat</button>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Nama Pasien</th>
+              <th>Kategori Tes</th>
+              <th>Tanggal & Waktu</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="patient-info">
+                  <div class="patient-avatar blue">RR</div>
+                  <div>
+                    <div class="patient-name">Ronald Richards</div>
+                    <div class="patient-id">ID: #PT-8821</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="test-category">Hematologi</span></td>
+              <td>
+                <div class="datetime-date">24 Okt 2025</div>
+                <div class="datetime-time">10:30 AM</div>
+              </td>
+              <td><span class="status-badge blue">Menunggu</span></td>
+              <td><button class="btn ghost tiny">Detail</button></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="patient-info">
+                  <div class="patient-avatar green">JC</div>
+                  <div>
+                    <div class="patient-name">Jane Cooper</div>
+                    <div class="patient-id">ID: #PT-8822</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="test-category">Kimia Klinik</span></td>
+              <td>
+                <div class="datetime-date">24 Okt 2025</div>
+                <div class="datetime-time">11:00 AM</div>
+              </td>
+              <td><span class="status-badge green">Selesai</span></td>
+              <td><button class="btn ghost tiny">Detail</button></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="patient-info">
+                  <div class="patient-avatar orange">BW</div>
+                  <div>
+                    <div class="patient-name">Budi Wibowo</div>
+                    <div class="patient-id">ID: #PT-8823</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="test-category">Imunoserologi</span></td>
+              <td>
+                <div class="datetime-date">24 Okt 2025</div>
+                <div class="datetime-time">11:15 AM</div>
+              </td>
+              <td><span class="status-badge blue">Menunggu</span></td>
+              <td><button class="btn ghost tiny">Detail</button></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="patient-info">
+                  <div class="patient-avatar purple">SA</div>
+                  <div>
+                    <div class="patient-name">Siti Aminah</div>
+                    <div class="patient-id">ID: #PT-8824</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="test-category">Urinalisa</span></td>
+              <td>
+                <div class="datetime-date">24 Okt 2025</div>
+                <div class="datetime-time">11:30 AM</div>
+              </td>
+              <td><span class="status-badge orange">Proses</span></td>
+              <td><button class="btn ghost tiny">Detail</button></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="patient-info">
+                  <div class="patient-avatar red">DK</div>
+                  <div>
+                    <div class="patient-name">Dedi Kusnandar</div>
+                    <div class="patient-id">ID: #PT-8825</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="test-category">Toksikologi</span></td>
+              <td>
+                <div class="datetime-date">24 Okt 2025</div>
+                <div class="datetime-time">11:45 AM</div>
+              </td>
+              <td><span class="status-badge blue">Menunggu</span></td>
+              <td><button class="btn ghost tiny">Detail</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+<section id="crud" class="view" data-role="admin">
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title" id="crud-title">Manage Data</h2>
+      <button class="btn btn-primary" id="crud-create">Create New</button>
+    </div>
+    
+    <div class="table-container mt">
+      <table class="table" id="crud-table-new">
+        <thead id="crud-head-new"></thead>
+        <tbody id="crud-body-new"></tbody>
+      </table>
+    </div>
+
+    <div class="divider mt"></div>
+    <form class="form grid-2 mt" id="crud-form" style="display:none"></form>
+  </div>
+</section>
+<section id="master-personalia" class="view" data-role="admin">
+    <div class="pos-header-maglo">
+      <div class="pos-title-section">
+        <h1>Data Master Personalia</h1>
+        <p>Kelola data pasien, dokter, analis, dan kasir.</p>
+      </div>
+    </div>
+
+    <div class="pos-report-grid">
+      <div class="report-card-maglo" onclick="showView('pasien')">
+        <div class="report-icon-wrap bg-blue-100 text-blue-600">
+          <svg width="24" height="24"><use href="#i-users"/></svg>
+        </div>
+        <h4>Data Pasien</h4>
+        <p>Manajemen database pasien, riwayat kunjungan, dan data demografi.</p>
+      </div>
+      
+      <div class="report-card-maglo" onclick="showView('crud:dokter')">
+        <div class="report-icon-wrap" style="background: #ecfdf5; color: #059669;">
+          <svg width="24" height="24"><use href="#i-doctor"/></svg>
+        </div>
+        <h4>Data Dokter</h4>
+        <p>Kelola daftar dokter rekanan dan dokter pengirim hasil lab.</p>
+      </div>
+
+      <div class="report-card-maglo" onclick="showView('crud:analis')">
+        <div class="report-icon-wrap" style="background: #fef2f2; color: #dc2626;">
+          <svg width="24" height="24"><use href="#i-flask"/></svg>
+        </div>
+        <h4>Analis Medik</h4>
+        <p>Data petugas laboratorium dan analis yang bertugas.</p>
+      </div>
+
+      <div class="report-card-maglo" onclick="showView('crud:kasir')">
+        <div class="report-icon-wrap" style="background: #fffbeb; color: #d97706;">
+          <svg width="24" height="24"><use href="#i-pos"/></svg>
+        </div>
+        <h4>Master Kasir</h4>
+        <p>Pengaturan data kasir dan otorisasi transaksi keuangan.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="master-laboratorium" class="view" data-role="admin">
+    <div class="pos-header-maglo">
+      <div class="pos-title-section">
+        <h1>Data Master Laboratorium</h1>
+        <p>Kelola tindakan, item hasil, diagnosa, dan daftar harga.</p>
+      </div>
+    </div>
+
+    <div class="pos-report-grid">
+      <div class="report-card-maglo" onclick="showView('pemeriksaan')">
+        <div class="report-icon-wrap" style="background: #f5f3ff; color: #7c3aed;">
+          <svg width="24" height="24"><use href="#i-medical"/></svg>
+        </div>
+        <h4>Tindakan / Layanan</h4>
+        <p>Daftar jenis pemeriksaan laboratorium dan layanan medis lainnya.</p>
+      </div>
+
+      <div class="report-card-maglo" onclick="showView('item-pemeriksaan')">
+        <div class="report-icon-wrap bg-blue-100 text-blue-600">
+          <svg width="24" height="24"><use href="#i-grid"/></svg>
+        </div>
+        <h4>Master Item Hasil</h4>
+        <p>Pengaturan parameter hasil lab, nilai rujukan, dan satuan.</p>
+      </div>
+
+      <div class="report-card-maglo" onclick="showView('diagnosa')">
+        <div class="report-icon-wrap" style="background: #ecfdf5; color: #059669;">
+          <svg width="24" height="24"><use href="#i-list"/></svg>
+        </div>
+        <h4>Master Diagnosa</h4>
+        <p>Database diagnosa penyakit berdasarkan standar ICD-10.</p>
+      </div>
+
+      <div class="report-card-maglo" onclick="showView('daftar-harga')">
+        <div class="report-icon-wrap" style="background: #fffbeb; color: #d97706;">
+          <svg width="24" height="24"><use href="#i-cash"/></svg>
+        </div>
+        <h4>Daftar Harga</h4>
+        <p>Manajemen tarif pemeriksaan dan paket layanan laboratorium.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="pasien" class="view" data-role="admin">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Manajemen Data Pasien</h2>
+        <button class="btn btn-primary" onclick="showAddPatientModal()">Tambah Pasien</button>
+      </div>
+      <div class="table-container mt">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Nama Pasien</th>
+              <th>Tgl Lahir</th>
+              <th>L/P</th>
+              <th>Kontak</th>
+              <th>Email</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="pasien-list-body">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+<section id="pemeriksaan" class="view" data-role="admin">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Master Tindakan / Layanan (Billing)</h2>
+        <button class="btn btn-primary" onclick="showAddPemeriksaanModal()">Tambah Tindakan</button>
+      </div>
+      <div class="table-container mt">
+        <table class="table">
+          <thead>
+            <tr>
+              <th width="50">Urut</th>
+              <th>Nama Tindakan</th>
+              <th>Harga Dasar</th>
+              <th>Item Hasil</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="pemeriksaan-list-body">
+            <!-- Will be populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="item-pemeriksaan" class="view" data-role="admin">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Master Item Hasil (Analyzer)</h2>
+        <button class="btn btn-primary" onclick="showAddItemModal()">Tambah Item</button>
+      </div>
+      <div class="table-container mt">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Kode</th>
+              <th>Nama Item</th>
+              <th>Nilai Normal</th>
+              <th>Satuan</th>
+              <th>Kode LOINC</th>
+              <th>Digunakan Di</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="item-list-body">
+            <!-- Will be populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+<section id="daftar-harga" class="view" data-role="admin">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Daftar Harga Pemeriksaan</h2>
+        <button class="btn btn-primary" onclick="showAddHargaModal()">Tambah Harga</button>
+      </div>
+      <div class="table-container mt">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Item / Layanan</th>
+              <th>Harga (Rp)</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="harga-list-body">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+<section id="diagnosa" class="view" data-role="admin">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Master Diagnosa (ICD-10)</h2>
+        <button class="btn btn-primary" onclick="showAddDiagnosaModal()">Tambah Diagnosa</button>
+      </div>
+      <div class="table-container mt">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Kode</th>
+              <th>Nama Diagnosa</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="diagnosa-list-body">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+<section id="mater-lab" class="view" data-role="admin">
+<div class="card">
+<div class="card-title">Data Mater Lab</div>
+<form class="form grid-2">
+<label>
+<span>Nama Bahan</span>
+<input type="text" required>
+</label>
+<label>
+<span>Stok</span>
+<input type="number" min="0">
+</label>
+<div class="form-actions">
+<button class="btn">Simpan</button>
+</div>
+</form>
+</div>
+</section>
+  <section id="pos" class="view" data-role="admin kasir">
+    <!-- POS Header (Maglo Style) -->
+    <div class="pos-header-maglo">
+      <div class="pos-title-section">
+        <h1 id="pos-invoice-title">Point of Sale</h1>
+        <div class="pos-tabs-maglo">
+          <div class="pos-tab-item active" onclick="switchPosTab('new-invoice')">Kasir (Invoice Baru)</div>
+          <div class="pos-tab-item" onclick="switchPosTab('invoice-history')">Riwayat Invoice</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- View: New Invoice -->
+    <div id="view-new-invoice" class="pos-view active">
+      <div class="pos-container-maglo">
+        <!-- Main Content (Left) -->
+        <div class="pos-main-maglo">
+          <!-- Company Header (Dark Card) -->
+          <div class="company-card-maglo">
+            <div class="company-info-left">
+              <div class="maglo-logo-wrap">
+                <svg width="24" height="24"><use href="#i-grid"/></svg>
+                <span>Lab Kawi</span>
+              </div>
+              <p class="company-email">info@labkawi.com</p>
+            </div>
+            <div class="company-info-right">
+              <p>1333 Grey Fox Farm Road</p>
+              <p>Malang, Jawa Timur</p>
+              <p>Batu, Indonesia, 65111</p>
+            </div>
+          </div>
+
+          <!-- Invoice Info Summary -->
+          <div class="invoice-summary-maglo">
+            <div class="summary-col">
+              <span class="summary-label">Invoice Number</span>
+              <p class="summary-value" id="inv-num-summary">INV-2541420</p>
+              <span class="summary-label">Issued Date</span>
+              <p class="summary-value" id="inv-date-summary">10 Apr 2022</p>
+            </div>
+            <div class="summary-col text-right">
+              <span class="summary-label">Billed to</span>
+              <p class="summary-value" id="inv-billed-name">Pilih Pasien</p>
+              <p class="summary-subvalue" id="inv-billed-addr">-</p>
+            </div>
+          </div>
+
+          <!-- Item Details -->
+          <div class="item-details-maglo">
+            <div class="item-header-maglo">
+              <h3>Daftar Tindakan</h3>
+              <p>Pilih pemeriksaan atau tindakan medis</p>
+            </div>
+            
+            <div class="pos-search-wrapper-maglo">
+              <svg width="18" height="18"><use href="#i-search"/></svg>
+              <input type="text" id="pos-test-search" placeholder="Cari nama pemeriksaan atau tindakan..." onkeyup="searchTestItems(this.value)">
+              <div id="test-search-results" class="search-dropdown" style="display:none"></div>
+            </div>
+
+            <table class="maglo-table">
+              <thead>
+                <tr>
+                  <th>TINDAKAN</th>
+                  <th class="text-right">BIAYA</th>
+                </tr>
+              </thead>
+              <tbody id="pos-items-body">
+                <tr>
+                  <td colspan="2" class="maglo-empty">
+                    <p>Belum ada tindakan yang dipilih</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="maglo-totals-wrap">
+              <div class="maglo-total-row">
+                <span>Subtotal</span>
+                <span id="pos-subtotal">Rp 0</span>
+              </div>
+              <div class="maglo-total-row">
+                <span>Discount</span>
+                <span id="pos-discount-display" class="maglo-accent-text">Add</span>
+              </div>
+              <div class="maglo-total-row">
+                <span>Biaya Spet</span>
+                <span id="pos-spet-display" class="maglo-accent-text">Add</span>
+              </div>
+              <div class="maglo-total-row main-total">
+                <span>Total</span>
+                <span id="pos-total">Rp 0</span>
+              </div>
+            </div>
+
+            <div class="maglo-notes-section">
+              <label>Catatan Tambahan</label>
+              <textarea id="pos-catatan" placeholder="Masukkan catatan khusus atau rujukan jika ada..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar (Right) -->
+        <div class="pos-sidebar-maglo">
+          <!-- Client Details Card -->
+          <div class="maglo-card client-card">
+            <div class="card-header-maglo">
+              <h3>Client Details</h3>
+              <button class="btn-icon-dots"><svg width="16" height="16"><use href="#i-grid"/></svg></button>
+            </div>
+            <div class="client-profile-maglo" id="patient-detail-card">
+              <div class="client-avatar-large">
+                <img id="patient-photo" src="https://ui-avatars.com/api/?name=P&background=f0f4ff&color=0066FF" style="width:100%; height:100%; border-radius:12px; object-fit:cover;">
+              </div>
+              <h4 id="det-nama">Pilih Pasien</h4>
+              <p id="det-status">Belum ada pasien terpilih</p>
+            </div>
+            <div class="client-info-list">
+              <div class="info-row">
+                <span class="info-label">NIK</span>
+                <span class="info-val" id="det-nik">-</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Umur / JK</span>
+                <span class="info-val" id="det-umur-jk">-</span>
+              </div>
+            </div>
+            
+            <div class="client-actions-maglo">
+              <div class="input-with-icon-maglo">
+                <svg width="16" height="16"><use href="#i-user"/></svg>
+                <input type="text" id="pos-patient-search" placeholder="Cari Pasien..." onkeyup="searchPatients(this.value)">
+                <div id="patient-search-results" class="search-dropdown" style="display:none"></div>
+              </div>
+              <div class="flex-gap mt-s">
+                 <label class="checkbox-maglo">
+                   <input type="checkbox" id="pos-privasi" onchange="toggleNikFallback(this)">
+                   <span>Non-NIK</span>
+                 </label>
+                 <button class="btn-maglo ghost tiny" onclick="showAddPatientModal()">+ Customer</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Basic Info Card -->
+          <div class="maglo-card basic-info-card">
+            <div class="card-header-maglo">
+              <h3>Basic Info</h3>
+            </div>
+            <div class="basic-info-fields">
+              <div class="field-maglo">
+                <label>Invoice Date</label>
+                <div class="input-icon-right">
+                  <input type="date" id="pos-tgl" value="2026-01-08">
+                </div>
+              </div>
+              <div class="field-maglo">
+                <label>Dokter Rekanan</label>
+                <div class="input-icon-right relative">
+                  <input type="text" id="pos-rekanan" placeholder="Cari Dokter..." onkeyup="searchDoctors(this.value)">
+                  <div id="doctor-search-results" class="search-dropdown" style="display:none"></div>
+                </div>
+              </div>
+              <div class="field-maglo">
+                <label>Biaya Spet & Diskon</label>
+                <div class="flex-gap">
+                  <input type="number" id="pos-spet" placeholder="Spet" value="0" oninput="updatePosTotal()">
+                  <div class="discount-wrap-maglo">
+                    <input type="number" id="pos-diskon-val" placeholder="Disc" value="0" oninput="updatePosTotal()">
+                    <select id="pos-diskon-type" onchange="updatePosTotal()">
+                      <option value="percent">%</option>
+                      <option value="nominal">Rp</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <button class="btn-maglo primary full" onclick="processInvoice()">Buat Invoice</button>
+            
+            <div class="sidebar-footer-btns">
+              <button class="btn-maglo outline" onclick="window.print()"><svg width="14" height="14" style="margin-right: 6px;"><use href="#i-grid"/></svg> Preview</button>
+              <button class="btn-maglo outline" onclick="window.print()"><svg width="14" height="14" style="margin-right: 6px;"><use href="#i-grid"/></svg> Download</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- View: Invoice History -->
+    <div id="view-invoice-history" class="pos-view">
+      <div class="maglo-card">
+        <div class="card-header-maglo">
+          <h3>Riwayat Invoice</h3>
+          <div class="header-search">
+            <svg width="16" height="16"><use href="#i-search"/></svg>
+            <input type="text" placeholder="Cari Invoice atau Pasien..." onkeyup="renderInvoiceHistory(this.value)">
+          </div>
+        </div>
+        <div class="table-container mt">
+          <table class="maglo-table">
+            <thead>
+                <tr>
+                  <th>Tgl</th>
+                  <th>No. Invoice</th>
+                  <th>Pasien</th>
+                  <th>Dokter</th>
+                  <th class="text-right">Total</th>
+                  <th>Status</th>
+                  <th class="text-right">Aksi</th>
+                </tr>
+              </thead>
+            <tbody id="pos-history-body">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="laporan-pusat" class="view" data-role="admin kasir operator">
+    <div class="pos-header-maglo">
+      <div class="pos-title-section">
+        <h1>Laporan & Rekapitulasi</h1>
+        <p>Pilih laporan yang ingin Anda lihat</p>
+      </div>
+    </div>
+
+    <div class="pos-report-grid">
+      <div class="report-card-maglo" onclick="showView('laporan-pos')">
+        <div class="report-icon-wrap bg-blue-100 text-blue-600">
+          <svg width="24" height="24"><use href="#i-grid"/></svg>
+        </div>
+        <h4>Laporan Kasir</h4>
+        <p>Rekapitulasi transaksi, metode pembayaran, dan pendapatan kasir per periode.</p>
+      </div>
+      <div class="report-card-maglo" onclick="showView('rekap-pasien')">
+        <div class="report-icon-wrap" style="background: #ecfdf5; color: #059669;">
+          <svg width="24" height="24"><use href="#i-user"/></svg>
+        </div>
+        <h4>Rekap Pasien</h4>
+        <p>Analisis jumlah kunjungan pasien dan demografi pasien per bulan.</p>
+      </div>
+      <div class="report-card-maglo" onclick="showView('rekap-dokter')">
+        <div class="report-icon-wrap" style="background: #fef2f2; color: #dc2626;">
+          <svg width="24" height="24"><use href="#i-grid"/></svg>
+        </div>
+        <h4>Rekap Dokter</h4>
+        <p>Laporan rujukan dokter rekanan dan kontribusi transaksi per dokter.</p>
+      </div>
+      <div class="report-card-maglo" onclick="showView('rekap-pemeriksaan')">
+        <div class="report-icon-wrap" style="background: #fffbeb; color: #d97706;">
+          <svg width="24" height="24"><use href="#i-search"/></svg>
+        </div>
+        <h4>Rekap Tindakan</h4>
+        <p>Lihat jenis pemeriksaan yang paling sering dipesan oleh pasien.</p>
+      </div>
+      <div class="report-card-maglo" onclick="showView('rekap-abnormal')">
+        <div class="report-icon-wrap" style="background: #fdf2f8; color: #db2777;">
+          <svg width="24" height="24"><use href="#i-grid"/></svg>
+        </div>
+        <h4>Hasil Abnormal</h4>
+        <p>Daftar pasien dengan hasil laboratorium di luar nilai rujukan (abnormal).</p>
+      </div>
+    </div>
+  </section>
+<section id="pembayaran" class="view" data-role="admin kasir">
+  <div class="pos-header-maglo">
+    <div class="pos-title-section">
+      <h1>Pembayaran & Keuangan</h1>
+      <div class="pos-tabs-maglo">
+        <div id="tab-piutang" class="pos-tab-item active" onclick="switchFinanceTab('piutang')">Piutang (Pasien)</div>
+        <div id="tab-hutang" class="pos-tab-item" onclick="switchFinanceTab('hutang')">Hutang (Supplier)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt">
+    <!-- Piutang View -->
+    <div id="view-piutang" class="finance-view active">
+      <div class="card p-0 overflow-hidden">
+        <div class="card-header border-b p-4 flex justify-between items-center bg-gray-50">
+          <h3 class="font-bold text-sm">Daftar Piutang Pasien</h3>
+          <div class="flex gap-2">
+            <input type="text" id="search-piutang" class="input small" placeholder="Cari invoice/pasien..." onkeyup="renderPiutang()">
+            <select id="filter-piutang" class="input small" onchange="renderPiutang()">
+              <option value="Belum Bayar">Belum Bayar</option>
+              <option value="Lunas">Lunas</option>
+              <option value="Batal">Dibatalkan</option>
+              <option value="Semua">Semua Status</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Tgl Invoice</th>
+                <th>No. Invoice</th>
+                <th>Nama Pasien</th>
+                <th>Dokter</th>
+                <th class="text-right">Total Tagihan</th>
+                <th>Status</th>
+                <th class="text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="piutang-list-table">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hutang View -->
+    <div id="view-hutang" class="finance-view" style="display:none">
+      <div class="card p-0 overflow-hidden">
+        <div class="card-header border-b p-4 flex justify-between items-center bg-gray-50">
+          <h3 class="font-bold text-sm">Daftar Hutang Supplier</h3>
+          <div class="flex gap-2">
+            <input type="text" id="search-hutang" class="input small" placeholder="Cari supplier/item..." onkeyup="renderHutang()">
+            <select id="filter-hutang" class="input small" onchange="renderHutang()">
+              <option value="Belum Bayar">Belum Bayar</option>
+              <option value="Lunas">Lunas</option>
+              <option value="Semua">Semua Status</option>
+            </select>
+            <button class="btn primary small" onclick="showAddHutangModal()">+ Tambah Hutang</button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Tgl Tagihan</th>
+                <th>ID Transaksi</th>
+                <th>Supplier</th>
+                <th>Item/Keterangan</th>
+                <th class="text-right">Total Hutang</th>
+                <th>Status</th>
+                <th class="text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="hutang-list-table">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section id="koreksi-transaksi" class="view" data-role="admin kasir">
+<div class="card">
+<div class="card-title">Koreksi/Hapus Transaksi</div>
+<form class="form grid-2">
+<label>
+<span>No Transaksi</span>
+<input type="text" required>
+</label>
+<label>
+<span>Alasan</span>
+<input type="text" required>
+</label>
+<div class="form-actions">
+<button class="btn">Koreksi</button>
+<button class="btn danger">Hapus</button>
+</div>
+</form>
+</div>
+</section>
+<section id="analis-lab" class="view" data-role="operator admin">
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Proses Lab (Input Hasil)</h2>
+      <div class="flex gap-2">
+        <input type="text" id="lab-search-inv" class="input" placeholder="Cari No. Invoice..." style="width: 200px;">
+        <button class="btn primary" onclick="renderProsesLab()">Cari</button>
+      </div>
+    </div>
+    
+    <div class="table-container mt">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>No. Invoice</th>
+            <th>Tgl</th>
+            <th>Pasien</th>
+            <th>Dokter</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="lab-invoice-list">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+<section id="radiologi" class="view" data-role="operator">
+<div class="card">
+<div class="card-title">Hasil Radiologi</div>
+<form class="form grid-2">
+<label>
+<span>Pasien</span>
+<input type="text">
+</label>
+<label class="grid-span-2">
+<span>Deskripsi</span>
+<textarea rows="4"></textarea>
+</label>
+<div class="form-actions">
+<button class="btn">Simpan</button>
+</div>
+</form>
+</div>
+</section>
+<section id="medical-report" class="view" data-role="operator">
+<div class="card">
+<div class="card-title">Medical Report</div>
+<form class="form grid-2">
+<label>
+<span>Pasien</span>
+<input type="text">
+</label>
+<label class="grid-span-2">
+<span>Ringkasan</span>
+<textarea rows="4"></textarea>
+</label>
+<div class="form-actions">
+<button class="btn">Simpan</button>
+</div>
+</form>
+</div>
+</section>
+<section id="laporan-pos" class="view" data-role="admin kasir">
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Laporan Kasir</h2>
+    <div class="flex gap-2">
+      <input type="date" id="lap-kasir-start" class="input tiny" style="width: 140px;">
+      <span class="flex items-center">s/d</span>
+      <input type="date" id="lap-kasir-end" class="input tiny" style="width: 140px;">
+      <button class="btn primary tiny" onclick="renderLaporanKasir()">Tampilkan</button>
+      <button class="btn ghost tiny" onclick="printReport('laporan-pos', 'Laporan Kasir')">
+        <svg width="14" height="14" style="margin-right:4px;"><use href="#i-grid"/></svg> Print
+      </button>
+    </div>
+  </div>
+  
+  <div class="grid grid-3 gap-4 mt">
+    <div class="p-4 bg-light rounded border">
+      <div class="text-muted tiny uppercase font-bold">Total Pendapatan</div>
+      <div class="h3 font-bold text-blue-600" id="lap-kasir-total">Rp 0</div>
+    </div>
+    <div class="p-4 bg-light rounded border">
+      <div class="text-muted tiny uppercase font-bold">Total Transaksi</div>
+      <div class="h3 font-bold" id="lap-kasir-count">0</div>
+    </div>
+    <div class="p-4 bg-light rounded border">
+      <div class="text-muted tiny uppercase font-bold">Rata-rata/Invoice</div>
+      <div class="h3 font-bold text-green-600" id="lap-kasir-avg">Rp 0</div>
+    </div>
+  </div>
+
+  <div class="table-container mt">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>No. Invoice</th>
+          <th>Pasien</th>
+          <th>Metode</th>
+          <th class="text-right">Total</th>
+        </tr>
+      </thead>
+      <tbody id="lap-kasir-body">
+        <!-- Populated by JS -->
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+<section id="rekap-pasien" class="view" data-role="admin">
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Rekap Kunjungan Pasien</h2>
+    <div class="flex gap-2">
+      <input type="text" id="lap-pasien-search" class="input tiny" placeholder="Nama Pasien / ID..." style="width: 200px;">
+      <button class="btn primary tiny" onclick="renderRekapPasien()">Cari Riwayat</button>
+      <button class="btn ghost tiny" onclick="printReport('rekap-pasien', 'Rekap Pasien')">Print</button>
+    </div>
+  </div>
+  
+  <div id="lap-pasien-info" class="mt p-3 bg-blue-50 border-blue-100 rounded text-blue-700" style="display:none">
+    Menampilkan riwayat kunjungan untuk: <span class="font-bold" id="lap-pasien-name-display"></span>
+  </div>
+
+  <div class="table-container mt">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Tgl Kunjungan</th>
+          <th>No. Invoice</th>
+          <th>Pemeriksaan</th>
+          <th class="text-right">Biaya</th>
+          <th>Status Lab</th>
+        </tr>
+      </thead>
+      <tbody id="lap-pasien-body">
+        <tr><td colspan="5" class="text-center p-4">Cari nama pasien untuk melihat riwayat</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+<section id="rekap-abnormal" class="view" data-role="admin operator">
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Laporan Hasil Abnormal</h2>
+    <div class="flex gap-2">
+      <input type="date" id="lap-abnormal-start" class="input tiny" style="width: 140px;">
+      <span class="flex items-center">s/d</span>
+      <input type="date" id="lap-abnormal-end" class="input tiny" style="width: 140px;">
+      <button class="btn primary tiny" onclick="renderRekapAbnormal()">Tampilkan</button>
+      <button class="btn ghost tiny" onclick="printReport('rekap-abnormal', 'Laporan Hasil Abnormal')">Print</button>
+    </div>
+  </div>
+  <div class="table-container mt">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Tgl</th>
+          <th>Pasien</th>
+          <th>Pemeriksaan</th>
+          <th>Parameter</th>
+          <th>Hasil</th>
+          <th>Rujukan</th>
+        </tr>
+      </thead>
+      <tbody id="lap-abnormal-body">
+        <!-- Populated by JS -->
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+<section id="rekap-dokter" class="view" data-role="admin">
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Rekap Referral Dokter</h2>
+    <div class="flex gap-2">
+      <select id="lap-dokter-select" class="input tiny" style="width: 200px;">
+        <option value="">Semua Dokter</option>
+      </select>
+      <input type="date" id="lap-dokter-start" class="input tiny" style="width: 140px;">
+      <span class="flex items-center">s/d</span>
+      <input type="date" id="lap-dokter-end" class="input tiny" style="width: 140px;">
+      <button class="btn primary tiny" onclick="renderRekapDokter()">Tampilkan</button>
+      <button class="btn ghost tiny" onclick="printReport('rekap-dokter', 'Rekap Dokter')">Print</button>
+    </div>
+  </div>
+  
+  <div class="grid grid-2 gap-4 mt">
+    <div class="p-4 bg-light rounded border">
+      <div class="text-muted tiny uppercase font-bold">Total Pasien Dirujuk</div>
+      <div class="h3 font-bold" id="lap-dokter-count">0</div>
+    </div>
+    <div class="p-4 bg-light rounded border">
+      <div class="text-muted tiny uppercase font-bold">Estimasi Omzet Referral</div>
+      <div class="h3 font-bold text-purple-600" id="lap-dokter-total">Rp 0</div>
+    </div>
+  </div>
+
+  <div class="table-container mt">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Tgl</th>
+          <th>No. Invoice</th>
+          <th>Nama Pasien</th>
+          <th>Dokter Pengirim</th>
+          <th class="text-right">Total Transaksi</th>
+        </tr>
+      </thead>
+      <tbody id="lap-dokter-body">
+        <!-- Populated by JS -->
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+<section id="rekap-pemeriksaan" class="view" data-role="admin operator">
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Statistik Tindakan / Layanan</h2>
+    <div class="flex gap-2">
+      <input type="date" id="lap-tindakan-start" class="input tiny" style="width: 140px;">
+      <span class="flex items-center">s/d</span>
+      <input type="date" id="lap-tindakan-end" class="input tiny" style="width: 140px;">
+      <button class="btn primary tiny" onclick="renderRekapTindakan()">Tampilkan</button>
+      <button class="btn ghost tiny" onclick="printReport('rekap-pemeriksaan', 'Statistik Tindakan')">Print</button>
+    </div>
+  </div>
+  <div class="table-container mt">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nama Tindakan</th>
+          <th class="text-center">Jumlah Pemeriksaan</th>
+          <th class="text-right">Total Pendapatan</th>
+        </tr>
+      </thead>
+      <tbody id="lap-tindakan-body">
+        <!-- Populated by JS -->
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+<section id="logistik-pemakaian" class="view" data-role="operator admin">
+  <div class="card">
+    <div class="card-header border-b p-4 flex justify-between items-center bg-gray-50">
+      <h2 class="card-title">Riwayat Pemakaian Bahan</h2>
+      <button class="btn primary" onclick="showAddPemakaianModal()">Catat Pemakaian Bahan</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Nama Bahan</th>
+            <th>Jumlah</th>
+            <th>Petugas</th>
+            <th class="text-right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="logistik-pemakaian-body">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="logistik-habis" class="view" data-role="operator admin">
+  <div class="card">
+    <div class="card-header border-b p-4 flex justify-between items-center bg-gray-50">
+      <h2 class="card-title">Daftar Bahan Habis / Low Stock</h2>
+      <button class="btn primary" onclick="showAddHabisModal()">Catat Bahan Habis</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Tanggal Lapor</th>
+            <th>Nama Bahan</th>
+            <th>Status</th>
+            <th>Pelapor</th>
+            <th class="text-right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="logistik-habis-body">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+<section id="logistik-koreksi" class="view" data-role="admin">
+<div class="card">
+<div class="card-title">Koreksi Data Logistik</div>
+<form class="form grid-2">
+<label>
+<span>No Referensi</span>
+<input type="text" required>
+</label>
+<label>
+<span>Alasan</span>
+<input type="text" required>
+</label>
+<div class="form-actions">
+<button class="btn">Koreksi</button>
+</div>
+</form>
+</div>
+</section>
+<section id="transaksi-kas" class="view" data-role="kasir admin">
+  <div class="card">
+    <div class="card-header border-b p-4 flex justify-between items-center bg-gray-50">
+      <h2 class="card-title">Riwayat Transaksi Kas</h2>
+      <button class="btn primary" onclick="showAddKasModal()">Catat Transaksi Kas</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Keterangan</th>
+            <th>Tipe</th>
+            <th class="text-right">Jumlah</th>
+            <th class="text-right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="transaksi-kas-body">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="transaksi-lain" class="view" data-role="kasir admin">
+  <div class="card">
+    <div class="card-header border-b p-4 flex justify-between items-center bg-gray-50">
+      <h2 class="card-title">Riwayat Kas Lain-lain</h2>
+      <button class="btn primary" onclick="showAddKasLainModal()">Catat Kas Lain-lain</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Keterangan</th>
+            <th>Tipe</th>
+            <th class="text-right">Jumlah</th>
+            <th class="text-right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="transaksi-lain-body">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+<section id="mutasi-kas" class="view" data-role="kasir admin">
+  <div class="card">
+    <div class="card-header border-b p-4 flex justify-between items-center bg-gray-50">
+      <h2 class="card-title">Riwayat Mutasi Kas</h2>
+      <button class="btn primary" onclick="showAddMutasiModal()">Catat Mutasi Kas</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Dari</th>
+            <th>Ke</th>
+            <th class="text-right">Jumlah</th>
+            <th>Keterangan</th>
+            <th class="text-right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="mutasi-kas-body">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+<section id="rbac" class="view" data-role="admin">
+  <div class="pos-header-maglo">
+    <div class="pos-title-section">
+      <h1>Hak Akses (RBAC)</h1>
+      <p>Kelola peran pengguna dan izin akses fitur aplikasi.</p>
+    </div>
+  </div>
+
+  <div class="mt">
+    <div class="card p-0 overflow-hidden">
+      <div class="card-header border-b p-4 flex justify-between items-center bg-gray-50">
+        <h3 class="font-bold text-sm">Daftar Role & Hak Akses</h3>
+        <button class="btn primary small flex items-center gap-2" onclick="showAddRoleModal()">
+          <svg width="14" height="14"><use href="#i-users"/></svg>
+          <span>Tambah Role Baru</span>
+        </button>
+      </div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width: 250px;">Nama Role</th>
+              <th>Izin Akses</th>
+              <th style="width: 150px;" class="text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="rbac-role-list-table">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+<section id="integrasi" class="view" data-role="admin">
+<div class="card">
+<div class="card-title">Integrasi SATUSEHAT</div>
+<form class="form grid-2">
+<label>
+<span>Client ID</span>
+<input type="text">
+</label>
+<label>
+<span>Client Secret</span>
+<input type="password">
+</label>
+<label class="grid-span-2">
+<span>Callback URL</span>
+<input type="url">
+</label>
+<div class="form-actions">
+<button class="btn">Simpan</button>
+</div>
+</form>
+</div>
+</section>
+</main>
+</div>
+<script src="script.js"></script>
+  <!-- Global Modal Container -->
+  <div id="modal-container" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-title">Form Title</h3>
+        <button class="btn ghost tiny" onclick="closeModal()">&times;</button>
+      </div>
+      <div id="modal-body" class="modal-body">
+        <!-- Dynamic Form Content -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn ghost" onclick="closeModal()">Batal</button>
+        <button id="modal-save-btn" class="btn btn-primary">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
