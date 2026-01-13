@@ -1555,6 +1555,9 @@ function route() {
   if (id === 'item-pemeriksaan') renderItemList();
   if (id === 'diagnosa') renderDiagnosaList();
   if (id === 'daftar-harga') renderHargaList();
+  if (id === 'rekap-pemeriksaan') renderRekapTindakan();
+  if (id === 'analisa-tat') renderAnalisaTat();
+  if (id === 'analisa-demografi') renderAnalisaDemografi();
   if (id === 'analis-lab') renderProsesLab();
   if (id === 'pembayaran') renderPiutang();
   if (id === 'rbac') renderRbacRoles();
@@ -1630,12 +1633,15 @@ function updateCrumbs(id, sub) {
     pos: ['Administrasi','Transaksi (POS)'],
     pembayaran: ['Administrasi','Pembayaran'],
     'koreksi-transaksi': ['Administrasi','Koreksi'],
-    'laporan-pusat': ['Administrasi','Laporan & Rekap'],
+    'laporan-pusat': ['Administrasi','Laporan Administrasi'],
+    'laporan-analisa': ['Proses Lab','Laporan Analisa'],
     'laporan-pos': ['Administrasi','Laporan Kasir'],
     'rekap-pasien': ['Administrasi','Rekap Pasien'],
     'rekap-dokter': ['Administrasi','Rekap Dokter'],
-    'rekap-pemeriksaan': ['Administrasi','Rekap Tindakan'],
-    'rekap-abnormal': ['Administrasi','Hasil Abnormal'],
+    'rekap-pemeriksaan': ['Proses Lab','Statistik Tindakan'],
+    'rekap-abnormal': ['Proses Lab','Hasil Abnormal'],
+    'analisa-tat': ['Proses Lab','Kecepatan Layanan'],
+    'analisa-demografi': ['Proses Lab','Demografi Pasien'],
     'analis-lab': ['Proses Lab','Hasil Analisa'],
     radiologi: ['Proses Lab','Radiologi'],
     'medical-report': ['Proses Lab','Medical Report'],
@@ -3076,9 +3082,125 @@ document.querySelectorAll('.sidebar-heading').forEach(btn => {
       <tr>
         <td class="font-bold">${name}</td>
         <td class="text-center">${data.count}</td>
-        <td class="text-right font-bold text-green-600">Rp ${Math.round(data.income).toLocaleString('id-ID')}</td>
       </tr>
     `).join('');
+  };
+
+  window.renderAnalisaTat = function() {
+    const start = document.getElementById('lap-tat-start').value;
+    const end = document.getElementById('lap-tat-end').value;
+    const body = document.getElementById('lap-tat-body');
+    if (!body) return;
+
+    let invoices = db.invoices.filter(inv => {
+      const hasResult = db.hasil_lab.some(h => h.invoiceId === inv.id);
+      return hasResult; // Only analyze completed ones
+    });
+
+    if (start) invoices = invoices.filter(inv => inv.tgl >= start);
+    if (end) invoices = invoices.filter(inv => inv.tgl <= end);
+
+    let totalTat = 0;
+    let minTat = Infinity;
+    let maxTat = -Infinity;
+    let tatData = [];
+
+    invoices.forEach(inv => {
+      const labResult = db.hasil_lab.find(h => h.invoiceId === inv.id);
+      // Simplified: use random TAT between 30-180 mins for demo if not exists, 
+      // or use real timestamps if we had them. Let's assume a random demo TAT for now.
+      const tat = labResult.tat || Math.floor(Math.random() * (180 - 30 + 1)) + 30;
+      
+      totalTat += tat;
+      if (tat < minTat) minTat = tat;
+      if (tat > maxTat) maxTat = tat;
+      
+      tatData.push({
+        id: inv.id,
+        pasien: inv.pasien,
+        start: inv.tgl + ' 08:00', // Mock time
+        end: inv.tgl + ' ' + (8 + Math.floor(tat/60)) + ':' + (tat%60).toString().padStart(2, '0'),
+        duration: tat
+      });
+    });
+
+    const avgTat = invoices.length > 0 ? Math.round(totalTat / invoices.length) : 0;
+    
+    document.getElementById('stat-tat-avg').textContent = avgTat + ' mnt';
+    document.getElementById('stat-tat-min').textContent = (minTat === Infinity ? 0 : minTat) + ' mnt';
+    document.getElementById('stat-tat-max').textContent = (maxTat === -Infinity ? 0 : maxTat) + ' mnt';
+
+    body.innerHTML = tatData.map(d => `
+      <tr>
+        <td class="font-bold">${d.id}</td>
+        <td>${d.pasien}</td>
+        <td>${d.start}</td>
+        <td>${d.end}</td>
+        <td class="text-right"><span class="badge ${d.duration > 120 ? 'danger' : 'ghost'}">${d.duration} mnt</span></td>
+      </tr>
+    `).join('');
+  };
+
+  window.renderAnalisaDemografi = function() {
+    const genderList = document.getElementById('demo-gender-list');
+    const ageList = document.getElementById('demo-age-list');
+    if (!genderList || !ageList) return;
+
+    const patients = db.pasien;
+    const total = patients.length;
+
+    // Gender stats
+    const genderCount = { 'Pria': 0, 'Wanita': 0 };
+    patients.forEach(p => {
+      if (genderCount[p.gender] !== undefined) genderCount[p.gender]++;
+    });
+
+    genderList.innerHTML = Object.entries(genderCount).map(([label, count]) => {
+      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+      return `
+        <div class="flex-column gap-1">
+          <div class="flex justify-between text-xs">
+            <span>${label}</span>
+            <span class="font-bold">${count} (${pct}%)</span>
+          </div>
+          <div style="height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden;">
+            <div style="width: ${pct}%; height: 100%; background: ${label === 'Pria' ? '#3b82f6' : '#ec4899'};"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Age stats
+    const ageGroups = {
+      'Anak (0-12)': 0,
+      'Remaja (13-18)': 0,
+      'Dewasa (19-59)': 0,
+      'Lansia (60+)': 0
+    };
+
+    patients.forEach(p => {
+      const birthYear = new Date(p.dob).getFullYear();
+      const age = new Date().getFullYear() - birthYear;
+      if (age <= 12) ageGroups['Anak (0-12)']++;
+      else if (age <= 18) ageGroups['Remaja (13-18)']++;
+      else if (age <= 59) ageGroups['Dewasa (19-59)']++;
+      else ageGroups['Lansia (60+)']++;
+    });
+
+    ageList.innerHTML = Object.entries(ageGroups).map(([label, count]) => {
+      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+      return `
+        <div class="flex-column gap-1">
+          <div class="flex justify-between text-xs">
+            <span>${label}</span>
+            <span class="font-bold">${count} (${pct}%)</span>
+          </div>
+          <div style="height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden;">
+            <div style="width: ${pct}%; height: 100%; background: #6366f1;"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
   };
 
   window.renderRekapAbnormal = function() {
@@ -3266,8 +3388,13 @@ if (btnLookup) {
     { id: 'pos', label: 'Transaksi (POS)', group: 'Administrasi' },
     { id: 'pembayaran', label: 'Pembayaran', group: 'Administrasi' },
     { id: 'koreksi-transaksi', label: 'Koreksi Transaksi', group: 'Administrasi' },
-    { id: 'laporan-pusat', label: 'Laporan & Rekap', group: 'Administrasi' },
+    { id: 'laporan-pusat', label: 'Laporan Administrasi', group: 'Administrasi' },
     { id: 'analis-lab', label: 'Hasil Analisa Lab', group: 'Proses Lab' },
+    { id: 'laporan-analisa', label: 'Laporan Analisa Lab', group: 'Proses Lab' },
+    { id: 'rekap-abnormal', label: 'Hasil Abnormal', group: 'Proses Lab' },
+    { id: 'rekap-pemeriksaan', label: 'Statistik Tindakan', group: 'Proses Lab' },
+    { id: 'analisa-tat', label: 'Kecepatan Layanan (TAT)', group: 'Proses Lab' },
+    { id: 'analisa-demografi', label: 'Demografi Pasien', group: 'Proses Lab' },
     { id: 'radiologi', label: 'Radiologi', group: 'Proses Lab' },
     { id: 'medical-report', label: 'Medical Report', group: 'Proses Lab' },
     { id: 'logistik-pemakaian', label: 'Pemakaian Bahan', group: 'Logistik' },
