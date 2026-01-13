@@ -3100,43 +3100,81 @@ document.querySelectorAll('.sidebar-heading').forEach(btn => {
     if (start) invoices = invoices.filter(inv => inv.tgl >= start);
     if (end) invoices = invoices.filter(inv => inv.tgl <= end);
 
-    let totalTat = 0;
+    let allTatTotal = 0;
     let minTat = Infinity;
     let maxTat = -Infinity;
     let tatData = [];
 
     invoices.forEach(inv => {
       const labResult = db.hasil_lab.find(h => h.invoiceId === inv.id);
-      // Simplified: use random TAT between 30-180 mins for demo if not exists, 
-      // or use real timestamps if we had them. Let's assume a random demo TAT for now.
-      const tat = labResult.tat || Math.floor(Math.random() * (180 - 30 + 1)) + 30;
       
-      totalTat += tat;
-      if (tat < minTat) minTat = tat;
-      if (tat > maxTat) maxTat = tat;
+      // Mocking more complex TAT data
+      // Registration: inv.tgl 08:00
+      // Result Input: inv.tgl + random (30-120 mins)
+      // Print: Result Input + random (10-1440 mins / up to 1 day)
       
+      const inputDelay = Math.floor(Math.random() * (120 - 30 + 1)) + 30;
+      const printDelay = Math.floor(Math.random() * (1440 - 10 + 1)) + 10;
+      const totalTat = inputDelay + printDelay;
+      
+      const regTime = new Date(`${inv.tgl} 08:00`);
+      const inputTime = new Date(regTime.getTime() + inputDelay * 60000);
+      const printTime = new Date(inputTime.getTime() + printDelay * 60000);
+
+      const formatDate = (date) => {
+        const d = date.getDate().toString().padStart(2, '0');
+        const m = (date.getMonth() + 1).toString().padStart(2, '0');
+        const y = date.getFullYear();
+        const h = date.getHours().toString().padStart(2, '0');
+        const min = date.getMinutes().toString().padStart(2, '0');
+        return `${y}-${m}-${d} ${h}:${min}`;
+      };
+
+      allTatTotal += totalTat;
+      if (totalTat < minTat) minTat = totalTat;
+      if (totalTat > maxTat) maxTat = totalTat;
+      
+      const formatDuration = (mins) => {
+        if (mins < 60) return `${mins} mnt`;
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        return `${h} jam ${m} mnt`;
+      };
+
       tatData.push({
         id: inv.id,
         pasien: inv.pasien,
-        start: inv.tgl + ' 08:00', // Mock time
-        end: inv.tgl + ' ' + (8 + Math.floor(tat/60)) + ':' + (tat%60).toString().padStart(2, '0'),
-        duration: tat
+        start: formatDate(regTime),
+        input: formatDate(inputTime),
+        print: formatDate(printTime),
+        duration: totalTat,
+        durationFormatted: formatDuration(totalTat)
       });
     });
 
-    const avgTat = invoices.length > 0 ? Math.round(totalTat / invoices.length) : 0;
+    const avgTat = invoices.length > 0 ? Math.round(allTatTotal / invoices.length) : 0;
     
-    document.getElementById('stat-tat-avg').textContent = avgTat + ' mnt';
-    document.getElementById('stat-tat-min').textContent = (minTat === Infinity ? 0 : minTat) + ' mnt';
-    document.getElementById('stat-tat-max').textContent = (maxTat === -Infinity ? 0 : maxTat) + ' mnt';
+    const formatAvg = (mins) => {
+      if (mins < 60) return `${mins} mnt`;
+      return `${Math.floor(mins/60)}j ${mins%60}m`;
+    };
+
+    document.getElementById('stat-tat-avg').textContent = formatAvg(avgTat);
+    document.getElementById('stat-tat-min').textContent = (minTat === Infinity ? 0 : formatAvg(minTat));
+    document.getElementById('stat-tat-max').textContent = (maxTat === -Infinity ? 0 : formatAvg(maxTat));
 
     body.innerHTML = tatData.map(d => `
       <tr>
         <td class="font-bold">${d.id}</td>
         <td>${d.pasien}</td>
-        <td>${d.start}</td>
-        <td>${d.end}</td>
-        <td class="text-right"><span class="badge ${d.duration > 120 ? 'danger' : 'ghost'}">${d.duration} mnt</span></td>
+        <td class="tiny">${d.start}</td>
+        <td class="tiny">${d.input}</td>
+        <td class="tiny text-accent font-bold">${d.print}</td>
+        <td class="text-right">
+          <span class="badge ${d.duration > 360 ? 'danger' : (d.duration > 120 ? 'warning' : 'ghost')}">
+            ${d.durationFormatted}
+          </span>
+        </td>
       </tr>
     `).join('');
   };
